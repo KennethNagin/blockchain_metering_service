@@ -101,6 +101,8 @@ postData = JSON.stringify(
   id: 0
 
 });
+console.log(postData);
+
 options = {
   hostname: 'c1bdbab254a44bb6be11653e6169b09f-vp0.us.blockchain.ibm.com',
   port: 5001,

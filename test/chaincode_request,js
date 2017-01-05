@@ -3,27 +3,40 @@ const fs = require('fs');
 const stdio = require('stdio')
 var date = new Date();
 
-var param = process.argv[2];
 var chaincodeIDPath = __dirname + "/chaincodeID";
 var chaincodeID = fs.readFileSync(chaincodeIDPath, 'utf8');
 chaincodeID = chaincodeID.trim(); 
-console.log('Param: ' + param);
+
+var opts = stdio.getopt({
+    'method': {key: 'm', args: 1, default: 'query', description: 'chaincode method'},
+	'function': {key: 'f', args: 1, default: 'read', description: 'chaincode function'},
+    'arguments': {key: 'a', args: '*', description: 'chaincode function arguments'},
+    'user': {key: 'u', args: 1, default: 'user_type1_1', description: 'user i.e. secureContext'},
+});
+console.log("args: "+opts.arguments)
+console.log("to string args: "+opts.arguments.toString())
+var _args = [] 
+if (Array.isArray(opts.arguments)) {
+	_args = opts.arguments	
+} else {
+	_args = [ opts.arguments ]
+}
 var postData = JSON.stringify(
 {
   jsonrpc: '2.0',
-  method: 'query',
+  method: opts.method,
   params: {
     type: 1,
     chaincodeID: {
       name: chaincodeID
     },
     ctorMsg: {
-      function: 'read',
-       args: [
-        param
-      ]
+      function: opts.function,
+       args: 
+         _args
+      
     },
-    secureContext: 'user_type1_1'
+    secureContext: opts.user
   },
   id: 0
 
