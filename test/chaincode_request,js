@@ -13,8 +13,7 @@ var opts = stdio.getopt({
     'arguments': {key: 'a', args: '*', description: 'chaincode function arguments'},
     'user': {key: 'u', args: 1, default: 'user_type1_1', description: 'user i.e. secureContext'},
 });
-console.log("args: "+opts.arguments)
-console.log("to string args: "+opts.arguments.toString())
+console.log(opts)
 var _args = [] 
 if (Array.isArray(opts.arguments)) {
 	_args = opts.arguments	
@@ -56,15 +55,31 @@ var options = {
   }
 };
 
+
 var req = https.request(options, (res) => {
   console.log(`STATUS: ${res.statusCode}`);
   console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
   res.setEncoding('utf8');
+  var body = '';
   res.on('data', (chunk) => {
-    console.log(`BODY: ${chunk}`);
+ //   console.log(`BODY: ${chunk}`);
+	body += chunk;
   });
   res.on('end', () => {
-    console.log('Completed read.');
+    console.log('request ended:');
+	var responseBody = JSON.parse(body)
+    console.log(`result: ${JSON.stringify(responseBody.result)}`);
+    console.log(`status: ${JSON.stringify(responseBody.result.status)}`);
+    console.log(`message:${JSON.stringify(responseBody.result.message)}`);
+	process.env['CHAINCODEID'] = JSON.stringify(responseBody.result.message);
+	process.env['FOO'] = 'abc';
+	fs.writeFile("FOO", responseBody.result.message, function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The file was saved!");
+}); 
   });
 });
 

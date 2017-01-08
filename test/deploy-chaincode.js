@@ -1,5 +1,5 @@
 const https = require('https');
-const querystring = require('querystring');
+const fs = require('fs');
 var date = new Date();
 
 
@@ -42,11 +42,21 @@ var req = https.request(options, (res) => {
   console.log(`STATUS: ${res.statusCode}`);
   console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
   res.setEncoding('utf8');
+  var body = '';
   res.on('data', (chunk) => {
     console.log(`BODY: ${chunk}`);
+	body += chunk;
   });
   res.on('end', () => {
     console.log('Completed deply.');
+	var responseBody = JSON.parse(body)
+    console.log(`result: ${JSON.stringify(responseBody.result)}`); 
+	fs.writeFile("CHAINCODEID", responseBody.result.message, function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+
   });
 });
 

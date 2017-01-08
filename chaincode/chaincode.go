@@ -19,7 +19,7 @@ package main
 import (
 	"errors"
 	"fmt"
-
+    "encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -99,8 +99,9 @@ func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string)
 
 // write - invoke function to write key/value pair
 func (t *SimpleChaincode) addAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var owner, asset, assets, jsonResp string
+	var owner, asset, jsonResp string
 	var err error
+	var b []byte
 	fmt.Println("running createAsset()")
 
 	if len(args) != 2 {
@@ -114,14 +115,25 @@ func (t *SimpleChaincode) addAsset(stub shim.ChaincodeStubInterface, args []stri
 		jsonResp = "{\"Error\":\"Failed to get state for " + owner + "\"}"
 		return nil, errors.New(jsonResp)
 	}
-	assets = asset
+	assets := make([]string,1) 
 	if valAsbytes != nil {
 		if len(valAsbytes) > 0 {
-			assets = string(valAsbytes[:])
-			assets = assets + "," + asset
+			//assets = string(valAsbytes[:])
+			//assets = assets + "," + asset
+			err = json.Unmarshal(valAsbytes,&assets)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	err = stub.PutState(owner, []byte(assets)) //write the variable into the chaincode state
+	// todo check that asset not duplicated
+	assets = append(assets,asset)
+//	err = stub.PutState(owner, []byte(assets)) //write the variable into the chaincode state
+    b, err = json.Marshal(assets)
+	if err != nil {
+		return nil, err
+	}
+	err = stub.PutState(owner, []byte(b)) //write the variable into the chaincode state
 	if err != nil {
 		return nil, err
 	}
